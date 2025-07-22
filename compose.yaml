@@ -1,6 +1,6 @@
 services:
-  main: 
-    container_name: easm
+  argos_main: 
+    container_name: argos_main
     build: .
     depends_on:
       db:
@@ -9,15 +9,13 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASS}@db:5432/${POSTGRES_DB}
     entrypoint: ["sleep", "infinity"]
     volumes: 
-      - data:/recondata
-      - /var/run/docker.sock:/var/run/docker.sock
+      - argos_data:/argos_data
     restart: unless-stopped
     networks: 
-      - easm_network
+      - argos_network
     
- 
   db:
-    container_name: postgres-db
+    container_name: argos_postgres-db
     image: postgres:latest
     environment: 
       POSTGRES_USER: ${POSTGRES_USER}
@@ -32,24 +30,26 @@ services:
       retries: 5
     restart: unless-stopped
     networks:
-      - easm_network
+      - argos_network
 
   subfinder: 
-    container_name: subfinder
-    build: ./docker/subfinder
+    container_name: argos_subfinder
+    image: projectdiscovery/subfinder:latest
     depends_on: 
-      - main
-    entrypoint: ["sleep", "infinity"]
+      - argos_main
+    entrypoint: /bin/sh
+    command: -c "subfinder -dL argos_data/domains.txt -o /recondata/subfinder.txt" 
     restart: "no"
     volumes:
-     - data:/recondata
+     - argos_data:/argos_data
+     - ./domains.txt:/argos_data/domains.txt
     networks:
-      - easm_network
+      - argos_network
 
 volumes: 
   postgres_data:
-  data:
+  argos_data:
 
 networks: 
-  easm_network:
+  argos_network:
     driver: bridge
