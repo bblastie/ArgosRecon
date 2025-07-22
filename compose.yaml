@@ -1,0 +1,55 @@
+services:
+  main: 
+    container_name: easm
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASS}@db:5432/${POSTGRES_DB}
+    entrypoint: ["sleep", "infinity"]
+    volumes: 
+      - data:/recondata
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    networks: 
+      - easm_network
+    
+ 
+  db:
+    container_name: postgres-db
+    image: postgres:latest
+    environment: 
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASS}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes: 
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck: 
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - easm_network
+
+  subfinder: 
+    container_name: subfinder
+    build: ./docker/subfinder
+    depends_on: 
+      - main
+    entrypoint: ["sleep", "infinity"]
+    restart: "no"
+    volumes:
+     - data:/recondata
+    networks:
+      - easm_network
+
+volumes: 
+  postgres_data:
+  data:
+
+networks: 
+  easm_network:
+    driver: bridge
