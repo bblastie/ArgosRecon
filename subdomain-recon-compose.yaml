@@ -1,0 +1,42 @@
+services:
+  subfinder: 
+    container_name: argos_subfinder
+    image: projectdiscovery/subfinder:latest
+    entrypoint: /bin/sh
+    command: -c "subfinder -dL argos_data/domains.txt -o /argos_data/subfinder.txt" 
+    restart: "no"
+    volumes:
+     - argos_data:/argos_data
+     - ./domains.txt:/argos_data/domains.txt
+    networks:
+      - argos_network
+  chaos:
+    container_name: argos_chaos
+    image: projectdiscovery/chaos-client:v0.5.1
+    entrypoint: /bin/sh
+    command: -c "chaos -key ${CHAOS_KEY} -dL argos_data/domains.txt -o /argos_data/chaos.txt"
+    restart: "no"
+    volumes:
+      - argos_data:/argos_data
+      - ./domains.txt:/argos_data/domains.txt
+    networks: 
+      - argos_network
+  amass: 
+    container_name: argos_amass
+    image: caffix/amass:latest
+    entrypoint: /bin/sh
+    command: -c "amass enum -df argos_data/domains.txt -o /argos_data/amass.txt -alts -passive -min-for-recursive 2 -brute -timeout 300"
+    user: root
+    restart: "no"
+    volumes:
+      - argos_data:/argos_data
+      - ./domains.txt:/argos_data/domains.txt
+    networks:
+      - argos_network
+
+volumes: 
+  argos_data:
+
+networks: 
+  argos_network:
+    driver: bridge

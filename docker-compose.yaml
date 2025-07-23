@@ -1,7 +1,7 @@
 services:
   argos_main: 
     container_name: argos_main
-    build: .
+    build: ./api
     depends_on:
       db:
         condition: service_healthy
@@ -23,14 +23,29 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes: 
       - postgres_data:/var/lib/postgresql/data
+      - ./api/sql/schema:/docker-entrypoint-initdb.d 
     healthcheck: 
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
     restart: unless-stopped
     networks:
       - argos_network
+
+  migrate:
+    container_name: argos_migrate
+    build: ./api/migrate
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASS}@db:5432/${POSTGRES_DB}
+    volumes:
+      - ./api/sql/schema:/migrations
+    networks:
+      - argos_network
+    restart: "no"
 
 volumes: 
   postgres_data:
