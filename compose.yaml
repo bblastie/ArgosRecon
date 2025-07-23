@@ -8,9 +8,9 @@ services:
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASS}@db:5432/${POSTGRES_DB}
     entrypoint: ["sleep", "infinity"]
-    volumes: 
-      - argos_data:/argos_data
     restart: unless-stopped
+    volumes:
+      - argos_data:/argos_data
     networks: 
       - argos_network
     
@@ -29,20 +29,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-    networks:
-      - argos_network
-
-  subfinder: 
-    container_name: argos_subfinder
-    image: projectdiscovery/subfinder:latest
-    depends_on: 
-      - argos_main
-    entrypoint: /bin/sh
-    command: -c "subfinder -dL argos_data/domains.txt -o /recondata/subfinder.txt" 
-    restart: "no"
-    volumes:
-     - argos_data:/argos_data
-     - ./domains.txt:/argos_data/domains.txt
     networks:
       - argos_network
 

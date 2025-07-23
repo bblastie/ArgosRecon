@@ -1,0 +1,19 @@
+services:
+  subfinder: 
+    container_name: argos_subfinder
+    image: projectdiscovery/subfinder:latest
+    entrypoint: /bin/sh
+    command: -c "subfinder -dL argos_data/domains.txt -o /argos_data/subfinder.txt && sleep infinity" 
+    restart: "no"
+    volumes:
+     - argos_data:/argos_data
+     - ./domains.txt:/argos_data/domains.txt
+    networks:
+      - argos_network
+
+volumes: 
+  argos_data:
+
+networks: 
+  argos_network:
+    driver: bridge
