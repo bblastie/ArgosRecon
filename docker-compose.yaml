@@ -6,11 +6,10 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASS}@db:5432/${POSTGRES_DB}
+      DATABASE_URL: ${DB_URL}
     ports: 
       - 8080:8080
-    entrypoint: ["sleep", "infinity"]
-    restart: unless-stopped
+    restart: "no"
     volumes:
       - argos_data:/argos_data
       - ./domains.txt:/argos_data/domains.txt
@@ -43,7 +42,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASS}@db:5432/${POSTGRES_DB}
+      DATABASE_URL: ${DB_URL}
     volumes:
       - ./api/sql/schema:/migrations
     networks:

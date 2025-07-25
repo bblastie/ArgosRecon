@@ -5,7 +5,7 @@
 package database
 
 import (
-	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -13,6 +13,6 @@ import (
 type Domain struct {
 	ID        uuid.UUID
 	Name      string
-	CreatedAt sql.NullTime
-	UpdatedAt sql.NullTime
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

@@ -8,4 +8,9 @@ INSERT INTO domains (
 VALUES (
     gen_random_uuid(), $1, NOW(), NOW()
 )
-RETURNING *;
+ON CONFLICT (name) DO UPDATE SET
+    updated_at = NOW()
+RETURNING id, name, created_at, updated_at;
+
+-- name: AllDomains :many
+SELECT id, name, created_at, updated_at from domains;

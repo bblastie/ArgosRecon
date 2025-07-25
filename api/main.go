@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -16,11 +15,15 @@ type apiConfig struct {
 }
 
 func main() {
-	godotenv.Load()
-	dbUrl := os.Getenv("DB_URL")
+	dbUrl := os.Getenv("DATABASE_URL")
+	if dbUrl == "" {
+		log.Fatal("DB_URL not set in .env")
+	}
+
 	db, err := sql.Open("postgres", dbUrl)
 	if err != nil {
 		log.Printf("Database connection failed: %s", err)
+		return
 	}
 
 	dbQueries := database.New(db)
@@ -38,7 +41,8 @@ func main() {
 		DB: dbQueries,
 	}
 
-	mux.HandleFunc("POST /api/domains", apiCfg.addDomains)
+	mux.HandleFunc("GET /health", health)
+	mux.HandleFunc("POST /domains", apiCfg.addDomains)
 
 	log.Printf("Serving on port: %s\n", port)
 	log.Fatal(srv.ListenAndServe())

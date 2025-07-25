@@ -9,6 +9,38 @@ import (
 	"context"
 )
 
+const allDomains = `-- name: AllDomains :many
+SELECT id, name, created_at, updated_at from domains
+`
+
+func (q *Queries) AllDomains(ctx context.Context) ([]Domain, error) {
+	rows, err := q.db.QueryContext(ctx, allDomains)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Domain
+	for rows.Next() {
+		var i Domain
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const insertDomain = `-- name: InsertDomain :one
 INSERT INTO domains (
     id, 
@@ -19,6 +51,8 @@ INSERT INTO domains (
 VALUES (
     gen_random_uuid(), $1, NOW(), NOW()
 )
+ON CONFLICT (name) DO UPDATE SET
+    updated_at = NOW()
 RETURNING id, name, created_at, updated_at
 `
 
