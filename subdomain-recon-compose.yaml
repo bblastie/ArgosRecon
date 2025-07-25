@@ -14,7 +14,7 @@ services:
     container_name: argos_chaos
     image: projectdiscovery/chaos-client:v0.5.1
     entrypoint: /bin/sh
-    command: -c "chaos -key ${CHAOS_KEY} -dL argos_data/domains.txt -o /argos_data/chaos.txt"
+    command: -c "chaos -key ${CHAOS_KEY} -dL argos_data/domains.txt -o /argos_data/chaos.txt && sleep infinity"
     restart: "no"
     volumes:
       - argos_data:/argos_data
