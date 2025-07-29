@@ -43,6 +43,7 @@ func main() {
 
 	mux.HandleFunc("GET /health", health)
 	mux.HandleFunc("POST /domains", apiCfg.addDomains)
+	mux.HandleFunc("PUT /domains/subdomains", apiCfg.addSubdomains)
 
 	log.Printf("Serving on port: %s\n", port)
 	log.Fatal(srv.ListenAndServe())

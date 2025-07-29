@@ -10,7 +10,7 @@ import (
 )
 
 const allDomains = `-- name: AllDomains :many
-SELECT id, name, created_at, updated_at from domains
+SELECT id, name, created_at, updated_at FROM domains
 `
 
 func (q *Queries) AllDomains(ctx context.Context) ([]Domain, error) {
@@ -58,6 +58,22 @@ RETURNING id, name, created_at, updated_at
 
 func (q *Queries) InsertDomain(ctx context.Context, name string) (Domain, error) {
 	row := q.db.QueryRowContext(ctx, insertDomain, name)
+	var i Domain
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const oneDomain = `-- name: OneDomain :one
+SELECT id, name, created_at, updated_at FROM domains WHERE name = $1
+`
+
+func (q *Queries) OneDomain(ctx context.Context, name string) (Domain, error) {
+	row := q.db.QueryRowContext(ctx, oneDomain, name)
 	var i Domain
 	err := row.Scan(
 		&i.ID,

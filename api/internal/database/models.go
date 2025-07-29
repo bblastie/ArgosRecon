@@ -16,3 +16,11 @@ type Domain struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type Subdomain struct {
+	ID        uuid.UUID
+	Name      string
+	DomainID  uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}

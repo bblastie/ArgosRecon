@@ -13,4 +13,7 @@ ON CONFLICT (name) DO UPDATE SET
 RETURNING id, name, created_at, updated_at;
 
 -- name: AllDomains :many
-SELECT id, name, created_at, updated_at from domains;
+SELECT id, name, created_at, updated_at FROM domains;
+
+-- name: OneDomain :one
+SELECT id, name, created_at, updated_at FROM domains WHERE name = $1;   
