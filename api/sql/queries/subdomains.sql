@@ -19,7 +19,7 @@ SELECT
     s.id,
     s.name,
     s.domain_id,
-    d.name as domain_name,  -- Add this via JOIN
+    d.name as domain_name, 
     s.created_at,
     s.updated_at
 FROM subdomains s 

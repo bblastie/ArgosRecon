@@ -14,13 +14,26 @@ services:
     container_name: argos_chaos
     image: projectdiscovery/chaos-client:v0.5.1
     entrypoint: /bin/sh
-    command: -c "chaos -key ${CHAOS_KEY} -dL argos_data/domains.txt -o /argos_data/chaos.txt && sleep infinity"
+    command: -c "chaos -key ${CHAOS_KEY} -dL argos_data/domains.txt -o /argos_data/chaos.txt"
     restart: "no"
     volumes:
       - argos_data:/argos_data
       - ./domains.txt:/argos_data/domains.txt
     networks: 
       - argos_network
+  subdomain_parser:
+    container_name: argos_subdomainparser
+    build: ./parsers/subdomainParser
+    volumes:
+      - argos_data:/argos_data
+      - ./domains.txt:/argos_data/domains.txt
+    networks: 
+      - argos_network
+    depends_on: 
+      subfinder:
+        condition: service_completed_successfully
+      chaos:
+        condition: service_completed_successfully
 
 volumes: 
   argos_data:

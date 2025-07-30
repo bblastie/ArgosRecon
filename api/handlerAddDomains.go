@@ -53,6 +53,8 @@ func (cfg *apiConfig) addDomains(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("Successfully inserted %d domains into databse", len(fileDomains))
+
 	domains, err := cfg.DB.AllDomains(r.Context())
 
 	var response []DomainResponse

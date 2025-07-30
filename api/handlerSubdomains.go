@@ -39,7 +39,7 @@ func (cfg *apiConfig) addSubdomains(w http.ResponseWriter, r *http.Request) {
 	for _, obj := range jsonData {
 		dbDomain, err := cfg.DB.OneDomain(r.Context(), obj.ApexDomain)
 		if err != nil {
-			respondWithError(w, http.StatusNotFound, "apex domain not in database. Please add it to domains.txt and POST /domains", err)
+			respondWithError(w, http.StatusNotFound, fmt.Sprintf("apex domain %s not in database. Please add it to domains.txt and POST /domains", obj.ApexDomain), err)
 			return
 		}
 

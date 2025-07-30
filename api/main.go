@@ -42,11 +42,11 @@ func main() {
 	}
 
 	mux.HandleFunc("GET /health", health)
+	// to do - change /domains to a get and load domains into db in main() from file
 	mux.HandleFunc("POST /domains", apiCfg.addDomains)
 	mux.HandleFunc("PUT /domains/subdomains", apiCfg.addSubdomains)
 	//to do - add a GET /domains/subdomains and /domains/{id}/subdomains
 
 	log.Printf("Serving on port: %s\n", port)
 	log.Fatal(srv.ListenAndServe())
-
 }
