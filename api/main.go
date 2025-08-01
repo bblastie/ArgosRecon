@@ -2,6 +2,8 @@ package main
 
 import (
 	"argos/internal/database"
+	"bufio"
+	"context"
 	"database/sql"
 	"log"
 	"net/http"
@@ -12,6 +14,32 @@ import (
 
 type apiConfig struct {
 	DB *database.Queries
+}
+
+func loadDomains(cfg *apiConfig) error {
+	file, err := os.Open("/argos_data/domains.txt")
+	if err != nil {
+		log.Printf("Failed to open domains.txt. Error: %s", err)
+		return err
+	}
+
+	scanner := bufio.NewScanner(file)
+
+	var domains []string
+
+	for scanner.Scan() {
+		domains = append(domains, scanner.Text())
+	}
+
+	for _, domain := range domains {
+		dbDomain, err := cfg.DB.InsertDomain(context.Background(), domain)
+		if err != nil {
+			log.Printf("Error inserting %s into database: %s", domain, err)
+			return err
+		}
+		log.Printf("Successfully added %s with ID of: %s", dbDomain.Name, dbDomain.ID)
+	}
+	return nil
 }
 
 func main() {
@@ -41,9 +69,14 @@ func main() {
 		DB: dbQueries,
 	}
 
+	domainErr := loadDomains(&apiCfg)
+	if domainErr != nil {
+		log.Fatalf("Could not load domains from domains.txt: %s", domainErr)
+		return
+	}
+
 	mux.HandleFunc("GET /health", health)
-	// to do - change /domains to a get and load domains into db in main() from file
-	mux.HandleFunc("POST /domains", apiCfg.addDomains)
+	mux.HandleFunc("GET /domains", apiCfg.getDomains)
 	mux.HandleFunc("PUT /domains/subdomains", apiCfg.addSubdomains)
 	//to do - add a GET /domains/subdomains and /domains/{id}/subdomains
 
