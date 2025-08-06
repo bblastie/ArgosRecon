@@ -65,7 +65,7 @@ func (cfg *apiConfig) addSubdomains(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, sub := range insertedSubdomains {
-			dbSub, err := cfg.DB.LookupSubdomain(r.Context(), sub.Name)
+			dbSub, err := cfg.DB.LookupSubdomainByName(r.Context(), sub.Name)
 			if err != nil {
 				log.Printf("error looking up %s from database", dbSub.Name)
 			}
@@ -81,4 +81,28 @@ func (cfg *apiConfig) addSubdomains(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	respondWithJSON(w, http.StatusCreated, jsonResponse)
+}
+
+func (cfg *apiConfig) deleteSubdomain(w http.ResponseWriter, r *http.Request) {
+	subdomainID, err := uuid.Parse(r.PathValue("id"))
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "Invalid ID", err)
+		return
+	}
+
+	dbSubdomain, err := cfg.DB.LookupSubdomainByID(r.Context(), subdomainID)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, fmt.Sprintf("Subdomain with ID %s not found", subdomainID), err)
+		return
+	}
+
+	log.Printf("Preparing to delete %s from database", dbSubdomain.Name)
+
+	delErr := cfg.DB.DeleteSubdomainByID(r.Context(), dbSubdomain.ID)
+	if delErr != nil {
+		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("error deleting %s from databse", dbSubdomain.Name), err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusNoContent, subdomainResponse{})
 }

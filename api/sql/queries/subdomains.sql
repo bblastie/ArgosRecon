@@ -14,7 +14,7 @@ ON CONFLICT (name) DO UPDATE SET
     updated_at = NOW()
 RETURNING id, name, domain_id, created_at, updated_at;
 
--- name: LookupSubdomain :one
+-- name: LookupSubdomainByName :one
 SELECT 
     s.id,
     s.name,
@@ -24,3 +24,9 @@ SELECT
     s.updated_at
 FROM subdomains s 
 JOIN domains d ON s.domain_id = d.id WHERE s.name = $1;
+
+-- name: LookupSubdomainByID :one
+SELECT * FROM subdomains WHERE id = $1;
+
+-- name: DeleteSubdomainByID :exec
+DELETE from subdomains WHERE id = $1; 

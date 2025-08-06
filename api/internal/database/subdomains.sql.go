@@ -12,6 +12,15 @@ import (
 	"github.com/google/uuid"
 )
 
+const deleteSubdomainByID = `-- name: DeleteSubdomainByID :exec
+DELETE from subdomains WHERE id = $1
+`
+
+func (q *Queries) DeleteSubdomainByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteSubdomainByID, id)
+	return err
+}
+
 const insertSubdomain = `-- name: InsertSubdomain :one
 INSERT INTO subdomains (
     id,
@@ -47,7 +56,24 @@ func (q *Queries) InsertSubdomain(ctx context.Context, arg InsertSubdomainParams
 	return i, err
 }
 
-const lookupSubdomain = `-- name: LookupSubdomain :one
+const lookupSubdomainByID = `-- name: LookupSubdomainByID :one
+SELECT id, name, domain_id, created_at, updated_at FROM subdomains WHERE id = $1
+`
+
+func (q *Queries) LookupSubdomainByID(ctx context.Context, id uuid.UUID) (Subdomain, error) {
+	row := q.db.QueryRowContext(ctx, lookupSubdomainByID, id)
+	var i Subdomain
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.DomainID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const lookupSubdomainByName = `-- name: LookupSubdomainByName :one
 SELECT 
     s.id,
     s.name,
@@ -59,7 +85,7 @@ FROM subdomains s
 JOIN domains d ON s.domain_id = d.id WHERE s.name = $1
 `
 
-type LookupSubdomainRow struct {
+type LookupSubdomainByNameRow struct {
 	ID         uuid.UUID
 	Name       string
 	DomainID   uuid.UUID
@@ -68,9 +94,9 @@ type LookupSubdomainRow struct {
 	UpdatedAt  time.Time
 }
 
-func (q *Queries) LookupSubdomain(ctx context.Context, name string) (LookupSubdomainRow, error) {
-	row := q.db.QueryRowContext(ctx, lookupSubdomain, name)
-	var i LookupSubdomainRow
+func (q *Queries) LookupSubdomainByName(ctx context.Context, name string) (LookupSubdomainByNameRow, error) {
+	row := q.db.QueryRowContext(ctx, lookupSubdomainByName, name)
+	var i LookupSubdomainByNameRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
