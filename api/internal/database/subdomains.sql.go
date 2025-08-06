@@ -107,3 +107,54 @@ func (q *Queries) LookupSubdomainByName(ctx context.Context, name string) (Looku
 	)
 	return i, err
 }
+
+const lookupSubdomainsByDomainID = `-- name: LookupSubdomainsByDomainID :many
+SELECT
+    s.id,
+    s.name,
+    s.domain_id, 
+    d.name as domain_name,
+    s.created_at,
+    s.updated_at
+FROM subdomains s 
+JOIN domains d ON s.domain_id = d.id WHERE d.id = $1
+`
+
+type LookupSubdomainsByDomainIDRow struct {
+	ID         uuid.UUID
+	Name       string
+	DomainID   uuid.UUID
+	DomainName string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
+func (q *Queries) LookupSubdomainsByDomainID(ctx context.Context, id uuid.UUID) ([]LookupSubdomainsByDomainIDRow, error) {
+	rows, err := q.db.QueryContext(ctx, lookupSubdomainsByDomainID, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []LookupSubdomainsByDomainIDRow
+	for rows.Next() {
+		var i LookupSubdomainsByDomainIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.DomainID,
+			&i.DomainName,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

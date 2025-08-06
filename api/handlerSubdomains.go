@@ -106,3 +106,37 @@ func (cfg *apiConfig) deleteSubdomain(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJSON(w, http.StatusNoContent, subdomainResponse{})
 }
+
+func (cfg *apiConfig) getSubdomainsByDomainId(w http.ResponseWriter, r *http.Request) {
+	domainID, err := uuid.Parse(r.PathValue("id"))
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "invalid ID", err)
+		return
+	}
+
+	dbDomain, err := cfg.DB.LookupDomainByID(r.Context(), domainID)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, fmt.Sprintf("Domain with ID %s not found", domainID), err)
+		return
+	}
+
+	var subdomainsJSOn []subdomainResponse
+
+	subdomains, err := cfg.DB.LookupSubdomainsByDomainID(r.Context(), dbDomain.ID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error looking up subdomains by ID", err)
+		return
+	}
+
+	for _, sub := range subdomains {
+		subdomainsJSOn = append(subdomainsJSOn, subdomainResponse{
+			ID:         sub.ID.String(),
+			Name:       sub.Name,
+			DomainID:   sub.DomainID,
+			DomainName: sub.DomainName,
+			CreatedAt:  sub.CreatedAt,
+			UpdatedAt:  sub.UpdatedAt,
+		})
+	}
+	respondWithJSON(w, http.StatusOK, subdomainsJSOn)
+}

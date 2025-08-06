@@ -79,7 +79,7 @@ func main() {
 	mux.HandleFunc("GET /domains", apiCfg.getDomains)
 	// tod do - add a GET /domains/{id} that returns all gathered data for the domain
 	mux.HandleFunc("DELETE /domains/{id}", apiCfg.deleteDomain)
-	//to do - add a GET /domains/{id}/subdomains
+	mux.HandleFunc("GET /domains/{id}/subdomains", apiCfg.getSubdomainsByDomainId)
 	mux.HandleFunc("PUT /domains/subdomains", apiCfg.addSubdomains)
 	mux.HandleFunc("DELETE /domains/subdomains/{id}", apiCfg.deleteSubdomain)
 
