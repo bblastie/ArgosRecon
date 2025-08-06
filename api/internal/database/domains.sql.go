@@ -7,6 +7,8 @@ package database
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const allDomains = `-- name: AllDomains :many
@@ -41,6 +43,15 @@ func (q *Queries) AllDomains(ctx context.Context) ([]Domain, error) {
 	return items, nil
 }
 
+const deleteOneDomain = `-- name: DeleteOneDomain :exec
+DELETE FROM domains WHERE id = $1
+`
+
+func (q *Queries) DeleteOneDomain(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteOneDomain, id)
+	return err
+}
+
 const insertDomain = `-- name: InsertDomain :one
 INSERT INTO domains (
     id, 
@@ -68,12 +79,28 @@ func (q *Queries) InsertDomain(ctx context.Context, name string) (Domain, error)
 	return i, err
 }
 
-const oneDomain = `-- name: OneDomain :one
+const lookupDomainByID = `-- name: LookupDomainByID :one
+SELECT id, name, created_at, updated_at FROM domains WHERE id = $1
+`
+
+func (q *Queries) LookupDomainByID(ctx context.Context, id uuid.UUID) (Domain, error) {
+	row := q.db.QueryRowContext(ctx, lookupDomainByID, id)
+	var i Domain
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const lookupDomainByName = `-- name: LookupDomainByName :one
 SELECT id, name, created_at, updated_at FROM domains WHERE name = $1
 `
 
-func (q *Queries) OneDomain(ctx context.Context, name string) (Domain, error) {
-	row := q.db.QueryRowContext(ctx, oneDomain, name)
+func (q *Queries) LookupDomainByName(ctx context.Context, name string) (Domain, error) {
+	row := q.db.QueryRowContext(ctx, lookupDomainByName, name)
 	var i Domain
 	err := row.Scan(
 		&i.ID,

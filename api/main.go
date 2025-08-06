@@ -78,7 +78,10 @@ func main() {
 	mux.HandleFunc("GET /health", health)
 	mux.HandleFunc("GET /domains", apiCfg.getDomains)
 	mux.HandleFunc("PUT /domains/subdomains", apiCfg.addSubdomains)
-	//to do - add a GET /domains/subdomains and /domains/{id}/subdomains
+	//to do - add a DELETE /domains - needs to cascade to subdomains
+	mux.HandleFunc("DELETE /domains/{id}", apiCfg.deleteDomain)
+	//to do - add a DELETE /domains/{id}/subdomains
+	//to do - add a GET /domains/{id}/subdomains
 
 	log.Printf("Serving on port: %s\n", port)
 	log.Fatal(srv.ListenAndServe())

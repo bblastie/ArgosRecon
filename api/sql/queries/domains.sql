@@ -15,5 +15,11 @@ RETURNING id, name, created_at, updated_at;
 -- name: AllDomains :many
 SELECT id, name, created_at, updated_at FROM domains;
 
--- name: OneDomain :one
+-- name: LookupDomainByName :one
 SELECT id, name, created_at, updated_at FROM domains WHERE name = $1;   
+
+-- name: LookupDomainByID :one
+SELECT id, name, created_at, updated_at FROM domains WHERE id = $1;
+
+-- name: DeleteOneDomain :exec
+DELETE FROM domains WHERE id = $1; 
