@@ -23,7 +23,7 @@ services:
       - argos_network
   subdomain_parser:
     container_name: argos_subdomainparser
-    build: ./parsers/subdomainParser
+    build: ./workflows/subdomain_parser
     volumes:
       - argos_data:/argos_data
       - ./domains.txt:/argos_data/domains.txt

@@ -31,8 +31,7 @@ func apexExtract(apexDomains, subdomains []string) map[string][]string {
 		for _, apex := range apexDomains {
 			if strings.HasSuffix(cleanSubdomain, "."+apex) {
 				result[apex] = append(result[apex], cleanSubdomain)
-				log.Printf("apex: %s", apex)
-				log.Printf("sub: %s", subdomain)
+				log.Printf("[+] apex: %s [+] sub: %s", apex, subdomain)
 				break
 			}
 		}
@@ -85,7 +84,6 @@ func main() {
 	subJsonPayload := []SubdomainJson{}
 
 	for apex, subdomains := range organizedList {
-		log.Printf("Apex to write to organizedList: %s", apex)
 		subJsonPayload = append(subJsonPayload, SubdomainJson{
 			Apex:       apex,
 			Subdomains: subdomains,
@@ -116,9 +114,9 @@ func main() {
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
+		log.Printf("Request body: %s", string(body))
 		log.Fatalf("Failed to read response body: %s", err)
 	}
 
 	log.Printf("Request result: %s", res.Status)
-	log.Printf("Request body: %s", string(body))
 }
